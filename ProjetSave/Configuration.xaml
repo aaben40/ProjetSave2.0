@@ -22,11 +22,13 @@
 
         <!-- Source Directory -->
         <Label Grid.Row="0" Grid.Column="0" Content="Source Directory:" VerticalAlignment="Center"/>
-        <TextBox Grid.Row="0" Grid.Column="1" x:Name="sourceTextBox" Margin="5" />
+        <TextBox Grid.Row="0" Grid.Column="1" x:Name="sourceTextBox" Margin="5,5,51,5" />
+        <Button Grid.Row="0" Grid.Column="1" Content="Browse..." Margin="531,5,5,5" Click="BrowseSource_Click"/>
 
         <!-- Target Directory -->
         <Label Grid.Row="1" Grid.Column="0" Content="Target Directory:" VerticalAlignment="Center"/>
-        <TextBox Grid.Row="1" Grid.Column="1" x:Name="targetTextBox" Margin="5" />
+        <TextBox Grid.Row="1" Grid.Column="1" x:Name="targetTextBox" Margin="5,5,51,5" />
+        <Button Grid.Row="1" Grid.Column="1" Content="Browse..." Margin="531,5,5,5" Click="BrowseTarget_Click"/>
 
         <!-- Backup Type -->
         <Label Grid.Row="2" Grid.Column="0" Content="Backup Type:" VerticalAlignment="Center"/>
@@ -51,5 +53,7 @@
                 <TextBlock x:Name="statusText" Text="Ready" />
             </StatusBarItem>
         </StatusBar>
+        <TextBlock HorizontalAlignment="Left" Margin="10,14,0,0" Grid.Row="4" TextWrapping="Wrap" VerticalAlignment="Top" Width="59"><Run Language="fr-fr" Text="Job Name"/></TextBlock>
+        <TextBox Grid.Row="4" Grid.Column="1" x:Name="JobNameTextbox" Margin="5,10,247,10" />
     </Grid>
 </Window>

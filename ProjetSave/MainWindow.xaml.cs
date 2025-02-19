@@ -25,21 +25,13 @@ namespace ProjetSave
             InitializeComponent();
             Jobs = new ObservableCollection<JobViewModel>();
             DataContext = this;
-            AddTestJob();   
+           
+            
         }
 
-        private void AddTestJob()
+        private void AddJob(JobViewModel job)
         {
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 1" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 2" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 3" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 4" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 5" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 6" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 7" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 8" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 9" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 10" });
+            Jobs.Add(job);
 
         }
 

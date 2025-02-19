@@ -28,7 +28,7 @@ namespace ProjetSave.Model
         public long TransferTimeMs { get; set; }
         public long EncryptionTime { get; set; }
 
-        public BackupJob(string name, string sourceDiretory, string targetDiretory, BackupType type, Logger logger)
+        public BackupJob(string name, string sourceDiretory, string targetDiretory, BackupType type)
         {
             Name = name;
             SourceDirectory = sourceDiretory;
@@ -39,29 +39,86 @@ namespace ProjetSave.Model
 
         public void Execute()
         {
-            ValidatePaths();
+            if (!ValidatePaths())
+            {
+                Console.WriteLine("Validation des chemins a échoué.");
+                return;
+            }
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            Console.WriteLine($"Starting backup job {Name}");
-            // Logic for performing backup
-           
 
-            if (IsEncrypted)
+            try
             {
-                EncryptFile();
+                Console.WriteLine($"Starting backup job {Name}");
+
+                // Déterminer si la source est un fichier ou un dossier
+                if (File.Exists(SourceDirectory))
+                {
+                    // Copie du fichier
+                    CopyFile(SourceDirectory, TargetDirectory);
+                }
+                else if (Directory.Exists(SourceDirectory))
+                {
+                    // Copie du dossier
+                    CopyDirectory(SourceDirectory, TargetDirectory);
+                }
+                else
+                {
+                    Console.WriteLine("Source path does not exist.");
+                    return;
+                }
+
+                if (IsEncrypted)
+                {
+                    EncryptFile(); // Encrypte le fichier ou le dossier destination
+                }
             }
-            stopwatch.Stop();
-            TransferTimeMs = stopwatch.ElapsedMilliseconds;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+            finally
+            {
+                stopwatch.Stop();
+                TransferTimeMs = stopwatch.ElapsedMilliseconds;
+                Console.WriteLine($"Backup job {Name} completed in {TransferTimeMs} ms");
+            }
         }
 
-        private void ValidatePaths()
+        private void CopyFile(string sourcePath, string targetPath)
         {
-            if (!Directory.Exists(SourceDirectory) || !Directory.Exists(TargetDirectory))
+            string fileName = Path.GetFileName(sourcePath);
+            string destPath = Path.Combine(targetPath, fileName);
+            File.Copy(sourcePath, destPath, true);
+            Console.WriteLine($"File copied from {sourcePath} to {destPath}");
+        }
+
+        private void CopyDirectory(string sourceDir, string targetDir)
+        {
+            // Créer le dossier de destination s'il n'existe pas
+            Directory.CreateDirectory(targetDir);
+
+            foreach (var file in Directory.GetFiles(sourceDir))
             {
-                throw new InvalidOperationException("Source or target directory does not exist.");
+                string fileName = Path.GetFileName(file);
+                string destFile = Path.Combine(targetDir, fileName);
+                File.Copy(file, destFile, true);
+            }
+
+            foreach (var dir in Directory.GetDirectories(sourceDir))
+            {
+                string dirName = Path.GetFileName(dir);
+                string destDir = Path.Combine(targetDir, dirName);
+                CopyDirectory(dir, destDir);
             }
         }
 
+        private bool ValidatePaths()
+        {
+            // Valider que les chemins source existent et que le chemin de destination est valide
+            return File.Exists(SourceDirectory) || Directory.Exists(SourceDirectory);
+        }
         private void EncryptFile()
         {
             Stopwatch stopwatch = new Stopwatch();

@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="pause.png" />
     <Resource Include="play.jpeg" />
     <Resource Include="playy.png" />

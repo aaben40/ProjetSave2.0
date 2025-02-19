@@ -7,30 +7,51 @@ using System.ComponentModel;
 using System.Windows.Input;
 using ProjetSave.Service;
 using System.Collections.ObjectModel;
+using ProjetSave.Model;
 
 namespace ProjetSave.ViewModel
 {
     public class JobViewModel : INotifyPropertyChanged
     {
-        
         private string name = "";
+        private string sourceDirectory = "";
+        private string targetDirectory = "";
+        private BackupType backupType;
+        private bool isEncrypted = false;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        // Propriété pour le nom du job
+        // Propriétés
         public string Name
         {
             get => name;
-            set
-            {
-                if (name != value)
-                {
-                    name = value;
-                    OnPropertyChanged(nameof(Name));
-                }
-            }
+            set => SetProperty(ref name, value);
         }
 
-        // Commandes pour Exécuter et Supprimer le job
+        public string SourceDirectory
+        {
+            get => sourceDirectory;
+            set => SetProperty(ref sourceDirectory, value);
+        }
+
+        public string TargetDirectory
+        {
+            get => targetDirectory;
+            set => SetProperty(ref targetDirectory, value);
+        }
+
+        public BackupType BackupType
+        {
+            get => backupType;
+            set => SetProperty(ref backupType, value);
+        }
+
+        public bool IsEncrypted
+        {
+            get => isEncrypted;
+            set => SetProperty(ref isEncrypted, value);
+        }
+
+        // Commandes pour exécuter et supprimer le job
         public ICommand ExecuteCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
 
@@ -44,26 +65,34 @@ namespace ProjetSave.ViewModel
             DeleteCommand = new RelayCommand(param => DeleteJob());
         }
 
-        // Méthode pour exécuter le job
         private void ExecuteJob()
         {
             // Logique pour exécuter le job
-            Console.WriteLine($"Executing job: {Name}");
+            Console.WriteLine($"Executing job: {Name}, Source: {SourceDirectory}, Target: {TargetDirectory}, Type: {BackupType}, Encrypted: {IsEncrypted}");
         }
 
-        // Méthode pour supprimer le job de la collection parente
         private void DeleteJob()
         {
             parentCollection.Remove(this);
             Console.WriteLine($"Deleted job: {Name}");
         }
 
-        // Méthode pour notifier les changements de propriétés
+        // Méthode générique pour notifier les changements de propriétés
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-       
+        // Méthode utilitaire pour setter les propriétés
+        protected void SetProperty<T>(ref T field, T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
+        {
+            if (!EqualityComparer<T>.Default.Equals(field, value))
+            {
+                field = value;
+                OnPropertyChanged(propertyName);
+            }
+        }
     }
+
+
 }
