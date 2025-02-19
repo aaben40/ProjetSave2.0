@@ -8,9 +8,12 @@ using System.Windows.Input;
 using ProjetSave.Service;
 using System.Collections.ObjectModel;
 using ProjetSave.Model;
+<<<<<<< HEAD
 using ProjetSave.Controller;
 using System.ServiceModel.Channels;
 using System.Windows;
+=======
+>>>>>>> my badversion stable traductionJob
 
 namespace ProjetSave.ViewModel
 {
@@ -48,6 +51,7 @@ namespace ProjetSave.ViewModel
         {
             get => backupType;
             set => SetProperty(ref backupType, value);
+<<<<<<< HEAD
         }
 
         public bool IsEncrypted
@@ -56,6 +60,16 @@ namespace ProjetSave.ViewModel
             set => SetProperty(ref isEncrypted, value);
         }
 
+=======
+        }
+
+        public bool IsEncrypted
+        {
+            get => isEncrypted;
+            set => SetProperty(ref isEncrypted, value);
+        }
+
+>>>>>>> my badversion stable traductionJob
         // Commandes pour exécuter et supprimer le job
         public ICommand ExecuteCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
@@ -73,10 +87,19 @@ namespace ProjetSave.ViewModel
             ExecuteCommand = new RelayCommand(param => ExecuteJob());
             DeleteCommand = new RelayCommand(param => DeleteJob());
 
+<<<<<<< HEAD
         }
 
        
 
+=======
+        private void ExecuteJob()
+        {
+            // Logique pour exécuter le job
+            Console.WriteLine($"Executing job: {Name}, Source: {SourceDirectory}, Target: {TargetDirectory}, Type: {BackupType}, Encrypted: {IsEncrypted}");
+        }
+
+>>>>>>> my badversion stable traductionJob
         private void DeleteJob()
         {
             parentCollection.Remove(this);
@@ -98,12 +121,15 @@ namespace ProjetSave.ViewModel
                 OnPropertyChanged(propertyName);
             }
         }
+<<<<<<< HEAD
 
         private void ExecuteJob()
         {
             backupManager.ExecuteJob(backupJob);
 
         }
+=======
+>>>>>>> my badversion stable traductionJob
     }
 
 
