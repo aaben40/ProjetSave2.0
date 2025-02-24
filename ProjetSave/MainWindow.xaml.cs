@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 ﻿using ProjetSave.Controller;
 using ProjetSave.ViewModel;
-=======
-﻿using ProjetSave.ViewModel;
 using System.Collections.Generic;
->>>>>>> my badversion stable traductionJob
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
@@ -17,10 +13,6 @@ namespace ProjetSave
 {
     public partial class MainWindow : Window
     {
-<<<<<<< HEAD
-        public BackupManager BackupManager { get; }
-=======
->>>>>>> my badversion stable traductionJob
         public ObservableCollection<JobViewModel> Jobs { get; }
 
         public MainWindow()
@@ -29,23 +21,32 @@ namespace ProjetSave
             Jobs = new ObservableCollection<JobViewModel>();
             BackupManager = new BackupManager(new Service.Logger("logfile.json"));
             DataContext = this;
-<<<<<<< HEAD
-           
-            
-=======
 
             // Appliquer la langue sauvegardée
             SetLanguage(Properties.Settings.Default.Language);
->>>>>>> my badversion stable traductionJob
         }
 
         private void AddJob(JobViewModel job)
         {
             Jobs.Add(job);
-<<<<<<< HEAD
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 3" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 4" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 5" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 6" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 7" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 8" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 9" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 10" });
 
-=======
->>>>>>> my badversion stable traductionJob
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 3" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 4" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 5" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 6" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 7" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 8" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 9" });
+            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 10" });
+
         }
 
         private void ConfigureBackup_Click(object sender, RoutedEventArgs e)
