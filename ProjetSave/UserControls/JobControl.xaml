@@ -20,7 +20,7 @@
         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="5" Grid.Column="0"/>
 
         <!-- Bouton Exécuter -->
-        <Button Content="Exécuter" Command="{Binding ExecuteCommand}" Margin="5" Grid.Column="1" FontSize="18"/>
+        <Button Content="Exécuter" Command="{Binding ExecuteCommand}" Margin="5" Grid.Column="1" FontSize="18" Click="Button_Click"/>
 
         <!-- Bouton Supprimer -->
         <Button Content="Supprimer" Command="{Binding DeleteCommand}" Margin="5" Grid.Column="2" FontSize="18"/>

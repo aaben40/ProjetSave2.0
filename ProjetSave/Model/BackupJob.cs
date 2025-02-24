@@ -14,7 +14,7 @@ namespace ProjetSave.Model
         Full,
         Incremental
     }
-    class BackupJob
+    public class BackupJob
     {
         public string Name { get; set; }
         public string SourceDirectory { get; set; }

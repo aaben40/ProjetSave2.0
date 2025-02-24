@@ -34,20 +34,35 @@ namespace ProjetSave
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-
             var mainWindow = Application.Current.MainWindow as MainWindow;
             if (mainWindow == null)
             {
-                MessageBox.Show("Mai  windows pas dispo"); return;
+                MessageBox.Show("Main window not available"); return;
+            }
+
+            if (backupTypeComboBox.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a backup type"); return;
             }
 
             // Créer un nouveau JobViewModel avec les informations saisies
-            JobViewModel newJob = new JobViewModel(mainWindow.Jobs)
+            BackupJob newBackupJob = new BackupJob(
+                JobNameTextbox.Text,
+                sourceTextBox.Text,
+                targetTextBox.Text,
+                (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString())
+            )
+            {
+                IsEncrypted = encryptCheckBox.IsChecked ?? false
+            };
+
+            // Créer un nouveau JobViewModel avec les informations saisies
+            JobViewModel newJob = new JobViewModel(mainWindow.BackupManager, newBackupJob, mainWindow.Jobs)
             {
                 Name = JobNameTextbox.Text,
                 SourceDirectory = sourceTextBox.Text,
                 TargetDirectory = targetTextBox.Text,
-                BackupType = (BackupType)Enum.Parse(typeof(BackupType), backupTypeComboBox.SelectedItem.ToString()),
+                BackupType = (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString()),
                 IsEncrypted = encryptCheckBox.IsChecked ?? false
             };
 

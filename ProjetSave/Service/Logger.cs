@@ -25,7 +25,7 @@ namespace ProjetSave.Service
         Json,
         Xml
     }
-    class Logger
+    public class Logger
     {
         private readonly string logFilePath;
         private LogFormat logFormat;

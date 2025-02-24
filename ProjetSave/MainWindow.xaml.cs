@@ -1,4 +1,5 @@
-﻿using ProjetSave.ViewModel;
+﻿using ProjetSave.Controller;
+using ProjetSave.ViewModel;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
@@ -18,12 +19,13 @@ namespace ProjetSave
     /// </summary>
     public partial class MainWindow : Window
     {
-
+        public BackupManager BackupManager { get; }
         public ObservableCollection<JobViewModel> Jobs { get; }
         public MainWindow()
         {
             InitializeComponent();
             Jobs = new ObservableCollection<JobViewModel>();
+            BackupManager = new BackupManager(new Service.Logger("logfile.json"));
             DataContext = this;
            
             

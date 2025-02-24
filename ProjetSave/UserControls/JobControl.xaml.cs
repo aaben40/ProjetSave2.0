@@ -39,5 +39,10 @@ namespace ProjetSave.UserControls
         {
             // Logique pour arrêter le job
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

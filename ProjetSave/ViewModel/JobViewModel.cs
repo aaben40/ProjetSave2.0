@@ -8,6 +8,9 @@ using System.Windows.Input;
 using ProjetSave.Service;
 using System.Collections.ObjectModel;
 using ProjetSave.Model;
+using ProjetSave.Controller;
+using System.ServiceModel.Channels;
+using System.Windows;
 
 namespace ProjetSave.ViewModel
 {
@@ -19,6 +22,8 @@ namespace ProjetSave.ViewModel
         private BackupType backupType;
         private bool isEncrypted = false;
         public event PropertyChangedEventHandler? PropertyChanged;
+        
+
 
         // Propriétés
         public string Name
@@ -57,19 +62,20 @@ namespace ProjetSave.ViewModel
 
         // Référence à la collection parente pour pouvoir se supprimer
         private ObservableCollection<JobViewModel> parentCollection;
+        private BackupManager backupManager;
+        private BackupJob backupJob;
 
-        public JobViewModel(ObservableCollection<JobViewModel> parent)
+        public JobViewModel(BackupManager manager, BackupJob job, ObservableCollection<JobViewModel> parent)
         {
-            parentCollection = parent;
+            this.backupManager = manager;
+            this.backupJob = job;
+            this.parentCollection = parent;
             ExecuteCommand = new RelayCommand(param => ExecuteJob());
             DeleteCommand = new RelayCommand(param => DeleteJob());
+
         }
 
-        private void ExecuteJob()
-        {
-            // Logique pour exécuter le job
-            Console.WriteLine($"Executing job: {Name}, Source: {SourceDirectory}, Target: {TargetDirectory}, Type: {BackupType}, Encrypted: {IsEncrypted}");
-        }
+       
 
         private void DeleteJob()
         {
@@ -91,6 +97,12 @@ namespace ProjetSave.ViewModel
                 field = value;
                 OnPropertyChanged(propertyName);
             }
+        }
+
+        private void ExecuteJob()
+        {
+            backupManager.ExecuteJob(backupJob);
+
         }
     }
 
