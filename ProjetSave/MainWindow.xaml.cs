@@ -15,6 +15,7 @@ namespace ProjetSave
     {
         public ObservableCollection<JobViewModel> Jobs { get; }
 
+        public BackupManager BackupManager { get; }
         public MainWindow()
         {
             InitializeComponent();
@@ -26,28 +27,7 @@ namespace ProjetSave
             SetLanguage(Properties.Settings.Default.Language);
         }
 
-        private void AddJob(JobViewModel job)
-        {
-            Jobs.Add(job);
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 3" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 4" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 5" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 6" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 7" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 8" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 9" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 10" });
-
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 3" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 4" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 5" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 6" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 7" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 8" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 9" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 10" });
-
-        }
+        
 
         private void ConfigureBackup_Click(object sender, RoutedEventArgs e)
         {
