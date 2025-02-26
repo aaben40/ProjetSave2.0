@@ -1,10 +1,21 @@
-﻿using ProjetSave.ViewModel;
+
+using ProjetSave.Controller;
+using ProjetSave.ViewModel;
+
+﻿
+using ProjetSave.Service;
+
+using System.Collections.Generic;
+
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+
 using System.Windows.Data;
 using System.Windows.Documents;
+
+
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -20,43 +31,47 @@ namespace ProjetSave
     {
 
         public ObservableCollection<JobViewModel> Jobs { get; }
+        //public ICommand StartCommand { get; }
+        public BackupManager BackupManager { get; }
+        public MainViewModel ViewModel { get; } = new MainViewModel();  
+
         public MainWindow()
         {
             InitializeComponent();
             Jobs = new ObservableCollection<JobViewModel>();
-            DataContext = this;
-            AddTestJob();   
-        }
 
-        private void AddTestJob()
-        {
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 1" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 2" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 3" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 4" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 5" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 6" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 7" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 8" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 9" });
-            Jobs.Add(new JobViewModel(Jobs) { Name = "Job 10" });
+             
+
+            BackupManager = new BackupManager(new Service.Logger("logfile.json"));
+            DataContext = ViewModel;
+            TextBox? logTextBox = this.FindName("logTextBox") as TextBox;
+            if (logTextBox != null)
+            {
+                Console.SetOut(new TextBoxOutputter(logTextBox, Dispatcher));
+            }
+            // Appliquer la langue sauvegardée
+            //SetLanguage(Properties.Settings.Default.Language);
+            //StartCommand = new RelayCommand(param => BackupManager.ExecuteAllJobs(Jobs));
 
         }
+
+       
 
         private void ConfigureBackup_Click(object sender, RoutedEventArgs e)
         {
-            Configuration configWindow = new Configuration();
+            Configuration configWindow = new Configuration(ViewModel);
             configWindow.ShowDialog(); // Utilisez ShowDialog pour une fenêtre modale si nécessaire
+
+            //Configuration configWindow = new Configuration();
+            //configWindow.ShowDialog();
+
         }
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+     
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
@@ -74,6 +89,19 @@ namespace ProjetSave
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Configuration configWindow = new Configuration(ViewModel);
+            configWindow.ShowDialog();
+        }
+
+       
+
+        private void logTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
 
         }

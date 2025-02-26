@@ -28,14 +28,15 @@
             </Grid.RowDefinitions>
 
             <ToolBar Grid.Row="0">
-                <Button Content="Add Job" Margin="5" Click="Button_Click"/>
-                <Button Content="Start" Margin="5" Click="Button_Click_1"/>
-                <Button Content="Pause" Margin="5" Click="Button_Click_2"/>
-                <Button Content="Stop" Margin="5" Click="Button_Click_3"/>
+
+                <Button Content="Add Job" Margin="5" Click="Button_Click" />
+                <Button Content="Start" Margin="5" Click="Button_Click_1" Command="{Binding StartCommand}" />
+                <Button Content="{Binding PauseButtonText}" Command="{Binding TogglePauseCommand}" Margin="5" />
+                <Button Content="Stop" Margin="5" Command="{Binding StopCommand}" />
             </ToolBar>
             
 
-            <TextBox Grid.Row="2" x:Name="logTextBox" Margin="5" Height="100" VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
+            <TextBox Grid.Row="2" x:Name="logTextBox" Margin="5" Height="100" VerticalScrollBarVisibility="Auto" IsReadOnly="True" TextChanged="logTextBox_TextChanged"/>
             <ScrollViewer Grid.Row="1">
                 
                 <ItemsControl ItemsSource="{Binding Jobs}">
