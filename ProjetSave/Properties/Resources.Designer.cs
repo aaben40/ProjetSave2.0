@@ -131,14 +131,5 @@ namespace ProjetSave.Properties {
                 return ResourceManager.GetString("Start", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Stop.
-        /// </summary>
-        internal static string Stop {
-            get {
-                return ResourceManager.GetString("Stop", resourceCulture);
-            }
-        }
     }
 }

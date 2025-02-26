@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Windows.Threading;
 using ProjetSave.Model;
+using System.Globalization;
 
 namespace ProjetSave
 {
@@ -126,6 +127,43 @@ namespace ProjetSave
             }
         }
 
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+
+        {
+
+            if (depObj != null)
+
+            {
+
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+
+                {
+
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+
+                    if (child is T obj)
+
+                    {
+
+                        yield return obj;
+
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+
+                    {
+
+                        yield return childOfChild;
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
         private bool IsProcessRunning(string processName)
         {
             foreach (Process proc in Process.GetProcesses())
@@ -138,6 +176,63 @@ namespace ProjetSave
 
         private void EncryptCheckBox_Checked(object sender, RoutedEventArgs e)
         {
+        }
+        public void ReloadUI()
+        {
+            foreach (var control in FindVisualChildren<MenuItem>(this))
+            {
+                if (control.Header is string headerText)
+                {
+                    if (headerText == "Settings") control.Header = Properties.Resources.Settings;
+                    if (headerText == "Configure Backup") control.Header = Properties.Resources.ConfigureBackup;
+                    if (headerText == "Language") control.Header = Properties.Resources.Language;
+                    if (headerText == "English") control.Header = Properties.Resources.English;
+                    if (headerText == "Français") control.Header = Properties.Resources.Français;
+                }
+            }
+
+            foreach (var control in FindVisualChildren<Button>(this))
+            {
+                if (control.Content is string contentText)
+                {
+                    if (contentText == "Add Job") control.Content = Properties.Resources.AddJob;
+                    if (contentText == "Start") control.Content = Properties.Resources.Start;
+                    if (contentText == "Pause") control.Content = Properties.Resources.Pause;
+                }
+            }
+        }
+        public void SetLanguage(string culture)
+
+        {
+
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
+
+            // Sauvegarde de la langue sélectionnée
+
+            Properties.Settings.Default.Langue = culture;
+
+            Properties.Settings.Default.Save();
+
+            // Mise à jour de l'UI
+
+            ReloadUI();
+
+        }
+
+        public void SetLanguage_English(object sender, RoutedEventArgs e)
+
+        {
+
+            SetLanguage("en");
+
+        }
+
+        public void SetLanguage_French(object sender, RoutedEventArgs e)
+
+        {
+
+            SetLanguage("fr");
+
         }
 
     }
