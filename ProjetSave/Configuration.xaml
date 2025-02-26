@@ -39,7 +39,7 @@
 
         <!-- Encrypt Files -->
         <Label Grid.Row="3" Grid.Column="0" Content="Encrypt Files:" VerticalAlignment="Center"/>
-        <CheckBox Grid.Row="3" Grid.Column="1" x:Name="encryptCheckBox" Margin="5"/>
+        <CheckBox Grid.Row="3" Grid.Column="1" x:Name="EncryptCheckBox" Margin="5" Checked="EncryptCheckBox_Checked"/>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">

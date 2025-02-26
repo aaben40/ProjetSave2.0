@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Text.Json;
 using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace ProjetSave.Service
 {
-
     public class LogEntry
     {
         public DateTime Timestamp { get; set; } = DateTime.Now;
@@ -18,30 +14,35 @@ namespace ProjetSave.Service
         public string TargetFilePath { get; set; } = string.Empty;
         public long FileSize { get; set; } = 0;
         public long TransferTimeMs { get; set; } = 0;
-        public long EncryptionTimeMs { get; set; } = 0; // Temps de cryptage ou code d'erreur
+        public long EncryptionTimeMs { get; set; } = 0;
     }
+
     public enum LogFormat
     {
         Json,
         Xml
     }
+
     public class Logger
     {
+        public delegate void LogUpdatedHandler(string logMessage);
+        public event LogUpdatedHandler LogUpdated;
+
         private readonly string logFilePath;
         private LogFormat logFormat;
-       
 
         public Logger(string path, LogFormat format = LogFormat.Json)
         {
             this.logFilePath = path;
             this.logFormat = format;
             SetupLogFile();
-
         }
 
+        private void NotifyLogUpdated(string logMessage)
+        {
+            LogUpdated?.Invoke(logMessage);
+        }
 
-        
-       
         public void logAction(LogEntry entry)
         {
             try
@@ -55,8 +56,6 @@ namespace ProjetSave.Service
                         LogToXml(entry);
                         break;
                 }
-                
-
             }
             catch (Exception ex)
             {
@@ -64,13 +63,13 @@ namespace ProjetSave.Service
             }
         }
 
-        public void LogToJson(LogEntry entry)
+        private void LogToJson(LogEntry entry)
         {
             List<LogEntry> entries = LoadEntriesFromJson() ?? new List<LogEntry>();
             entries.Add(entry);
-            string json = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true});
+            string json = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(logFilePath, json);
-
+            NotifyLogUpdated(JsonSerializer.Serialize(entry, new JsonSerializerOptions { WriteIndented = true }));
         }
 
         private void LogToXml(LogEntry entry)
@@ -82,9 +81,10 @@ namespace ProjetSave.Service
                 XmlSerializer serializer = new XmlSerializer(typeof(List<LogEntry>));
                 serializer.Serialize(writer, entries);
             }
+            NotifyLogUpdated($"Log added: {entry.BackupName} - {entry.Timestamp}");
         }
 
-        public void SetupLogFile()
+        private void SetupLogFile()
         {
             if (!File.Exists(logFilePath))
             {
@@ -96,8 +96,8 @@ namespace ProjetSave.Service
                     case LogFormat.Xml:
                         using (StreamWriter writer = new StreamWriter(logFilePath))
                         {
-                            XmlSerializer serializer = new XmlSerializer(typeof(List<string>));
-                            serializer.Serialize(writer, new List<string>());
+                            XmlSerializer serializer = new XmlSerializer(typeof(List<LogEntry>));
+                            serializer.Serialize(writer, new List<LogEntry>());
                         }
                         break;
                 }
@@ -109,8 +109,7 @@ namespace ProjetSave.Service
             if (File.Exists(logFilePath))
             {
                 string content = File.ReadAllText(logFilePath);
-                var result = JsonSerializer.Deserialize<List<LogEntry>>(content);
-                return result ?? new List<LogEntry>();
+                return JsonSerializer.Deserialize<List<LogEntry>>(content);
             }
             return new List<LogEntry>();
         }
@@ -121,19 +120,9 @@ namespace ProjetSave.Service
             {
                 using var stream = new FileStream(logFilePath, FileMode.Open);
                 XmlSerializer serializer = new XmlSerializer(typeof(List<LogEntry>));
-                var result = serializer.Deserialize(stream) as List<LogEntry>;
-                return result ?? new List<LogEntry>();
+                return serializer.Deserialize(stream) as List<LogEntry>;
             }
             return new List<LogEntry>();
-        }
-        public void SwitchLogFormat(LogFormat newFormat)
-        {
-            if (logFormat != newFormat)
-            {
-                logFormat = newFormat;
-                SetupLogFile();
-
-            }
         }
     }
 }

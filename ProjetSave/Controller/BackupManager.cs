@@ -145,39 +145,6 @@ namespace ProjetSave.Controller
             }
         }
 
-        private long EncryptFiles(BackupJob job)
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            Console.WriteLine($"Encrypting files for {job.Name}");
-            // Simulate encryption process
-            Thread.Sleep(500); // Simulate some delay for demonstration
-            stopwatch.Stop();
-            return stopwatch.ElapsedMilliseconds;
-        }
-
-        //private void EncryptDirectoryFiles(string directoryPath)
-        //{
-        //    foreach (string file in Directory.GetFiles(directoryPath))
-        //    {
-        //        try
-        //        {
-        //            Appel à CryptoSoft pour crypter le fichier
-        //            CryptoSoft.EncryptFile(file);
-        //            Console.WriteLine($"Encrypted {file}");
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine($"Failed to encrypt {file}: {ex.Message}");
-        //        }
-        //    }
-
-        //    Récursivité pour les sous-dossiers
-        //    foreach (string subdirectory in Directory.GetDirectories(directoryPath))
-        //    {
-        //        EncryptDirectoryFiles(subdirectory);
-        //    }
-        //}
-
         private long CalculateFileSize(string path)
         {
             // Method to calculate the total size of files in a directory
@@ -188,7 +155,10 @@ namespace ProjetSave.Controller
             Stopwatch stopwatch = Stopwatch.StartNew();
             try
             {
+                // 1) Valider les chemins, etc.
                 ValidatePaths(job);
+
+                // 2) Exécuter la sauvegarde (full ou incrémentielle)
                 switch (job.Type)
                 {
                     case BackupType.Full:
@@ -202,11 +172,20 @@ namespace ProjetSave.Controller
                 stopwatch.Stop();
                 job.TransferTimeMs = stopwatch.ElapsedMilliseconds;
 
+                // 3) Si le job est en mode crypté, appeler la logique d’encryptage
                 if (job.IsEncrypted)
                 {
-                    job.EncryptionTimeMs = EncryptFiles(job);
+                    // Par exemple, on calcule le temps mis pour chiffrer
+                    Stopwatch encStopwatch = Stopwatch.StartNew();
+
+                    // On réutilise la méthode du job
+                    job.EncryptAllFilesInTarget();
+
+                    encStopwatch.Stop();
+                    job.EncryptionTimeMs = encStopwatch.ElapsedMilliseconds;
                 }
 
+                // 4) Log final
                 logger.logAction(new LogEntry
                 {
                     BackupName = job.Name,
@@ -219,17 +198,19 @@ namespace ProjetSave.Controller
             }
             catch (Exception ex)
             {
+                // En cas d’erreur, log 
                 logger.logAction(new LogEntry
                 {
                     BackupName = job.Name,
                     SourceFilePath = job.SourceDirectory,
                     TargetFilePath = job.TargetDirectory,
                     FileSize = CalculateFileSize(job.SourceDirectory),
-                    TransferTimeMs = ex.HResult, // HResult used to indicate error in transfer
-                    EncryptionTimeMs = ex.HResult // HResult used to indicate error in encryption
+                    TransferTimeMs = ex.HResult,   // 
+                    EncryptionTimeMs = ex.HResult  // 
                 });
             }
         }
+
 
         public void ExecuteSequentialJobs()
         {
