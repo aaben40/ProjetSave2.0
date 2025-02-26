@@ -24,6 +24,15 @@ namespace ProjetSave
     /// </summary>
     public partial class Configuration : Window
     {
+
+        private BackupJob _backupJob;
+
+        public Configuration(BackupJob job)
+        {
+            InitializeComponent();
+            _backupJob = job;
+        }
+
         private ViewModel.BackupJobViewModel ViewModel;
 
         public Configuration()
@@ -53,7 +62,7 @@ namespace ProjetSave
                 (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString())
             )
             {
-                IsEncrypted = encryptCheckBox.IsChecked ?? false
+                IsEncrypted = EncryptCheckBox.IsChecked ?? false
             };
 
 
@@ -71,7 +80,7 @@ namespace ProjetSave
                 TargetDirectory = targetTextBox.Text,
 
                 BackupType = (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString()),
-                IsEncrypted = encryptCheckBox.IsChecked ?? false
+                IsEncrypted = EncryptCheckBox.IsChecked ?? false
             };
 
             // Ajouter le nouveau job à la collection dans MainViewModel
@@ -107,6 +116,19 @@ namespace ProjetSave
             //        targetTextBox.Text = folderBrowserDialog.SelectedPath;
             //    }
             //}
+        }
+
+        // Exemple de code, supposant que vous avez une instance de BackupJob nommée 'currentJob'
+
+
+        private void EncryptCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void EncryptCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
 }

@@ -1,38 +1,72 @@
 ﻿using ProjetSave.Controller;
 using ProjetSave.ViewModel;
-using System.Collections.Generic;
+using ProjetSave.Service; // Assurez-vous d'ajouter l'espace de nom pour Logger
 using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Linq;
-using System.Threading;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Diagnostics;
+using System.Windows.Threading;
+using ProjetSave.Model;
 
 namespace ProjetSave
 {
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<JobViewModel> Jobs { get; }
-
         public BackupManager BackupManager { get; }
+        public ObservableCollection<JobViewModel> Jobs { get; private set; }
+        private Logger logger;  // Ajout d'un membre Logger
+        DispatcherTimer processCheckTimer;
         public MainWindow()
         {
             InitializeComponent();
+            InitializeProcessCheckTimer();
             Jobs = new ObservableCollection<JobViewModel>();
-            BackupManager = new BackupManager(new Service.Logger("logfile.json"));
+            logger = new Logger("C:\\Users\\Utilisateur\\source\\repos\\ProjetSave2.0\\LOGS\\logfile.json");  // Configurez votre chemin de log ici
+            BackupManager = new BackupManager(logger);
             DataContext = this;
 
-            // Appliquer la langue sauvegardée
-            SetLanguage(Properties.Settings.Default.Language);
+            // Abonnement à l'événement de mise à jour du log
+            logger.LogUpdated += Logger_LogUpdated;
+
+            //test de log
+            //logger.logAction(new LogEntry { BackupName = "Test", SourceFilePath = "C:\\Users\\Utilisateur\\source\\repos\\ProjetSave2.0\\CESI", TargetFilePath = "C:\\C:\\Users\\Utilisateur\\source\\repos\\ProjetSave2.0\\NON" });
+
+            string testInputFile = @"C:\Users\Utilisateur\source\repos\ProjetSave2.0\CESI\test.txt";
+            string testOutputFile = @"C:\Users\Utilisateur\source\repos\ProjetSave2.0\NON\test.aes";
+
+            BackupJob job = new BackupJob("TestJob", @"C:\Users\Utilisateur\source\repos\ProjetSave2.0\CESI", @"C:\Users\Utilisateur\source\repos\ProjetSave2.0\NON", BackupType.Full);
+            job.EncryptFile(testInputFile, testOutputFile);
         }
 
-        
+        private void Logger_LogUpdated(string logMessage)
+        {
+            // Mettre à jour la TextBox sur le thread UI
+            Dispatcher.Invoke(() => {
+                logTextBox.AppendText(logMessage + Environment.NewLine);  // Assurez-vous que logTextBox est le nom correct dans votre XAML
+                logTextBox.ScrollToEnd();
+            });
+        }
+
+        private void AddJob(JobViewModel job)
+        {
+            Jobs.Add(job);
+        }
 
         private void ConfigureBackup_Click(object sender, RoutedEventArgs e)
         {
             Configuration configWindow = new Configuration();
-            configWindow.ShowDialog();
+            configWindow.ShowDialog(); // Utilisez ShowDialog pour une fenêtre modale si nécessaire
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
@@ -40,73 +74,71 @@ namespace ProjetSave
             this.Close();
         }
 
-        // Changer la langue et enregistrer
-        private void SetLanguage(string culture)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
-            Thread.CurrentThread.CurrentCulture = new CultureInfo(culture);
 
-            Properties.Settings.Default.Language = culture;
-            Properties.Settings.Default.Save();
-
-            ReloadUI();
         }
 
-        private void SetLanguage_English(object sender, RoutedEventArgs e)
+        private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            SetLanguage("en");
+
         }
 
-        private void SetLanguage_French(object sender, RoutedEventArgs e)
+        private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            SetLanguage("fr");
+
         }
 
-        // Mise à jour des textes
-        private void ReloadUI()
+        private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            foreach (var control in FindVisualChildren<MenuItem>(this))
-            {
-                if (control.Header.ToString() == "Settings") control.Header = Properties.Resources.Settings;
-                if (control.Header.ToString() == "Configure Backup") control.Header = Properties.Resources.ConfigureBackup;
-                if (control.Header.ToString() == "Language") control.Header = Properties.Resources.Language;
-                if (control.Header.ToString() == "English") control.Header = Properties.Resources.English;
-                if (control.Header.ToString() == "Français") control.Header = Properties.Resources.Français;
-            }
 
-            foreach (var control in FindVisualChildren<Button>(this))
-            {
-                if (control.Content.ToString() == "Add Job") control.Content = Properties.Resources.AddJob;
-                if (control.Content.ToString() == "Start") control.Content = Properties.Resources.Start;
-                if (control.Content.ToString() == "Pause") control.Content = Properties.Resources.Pause;
-                if (control.Content.ToString() == "Stop") control.Content = Properties.Resources.Stop;
-            }
-        }
-
-        // Récupérer tous les éléments d'UI
-        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
-        {
-            if (depObj != null)
-            {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-                {
-                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child is T obj)
-                    {
-                        yield return obj;
-                    }
-
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                    {
-                        yield return childOfChild;
-                    }
-                }
-            }
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
 
         }
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void logTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Cette méthode peut rester vide si elle n'est pas utilisée
+        }
+
+
+        private void InitializeProcessCheckTimer()
+        {
+            processCheckTimer = new DispatcherTimer();
+            processCheckTimer.Interval = TimeSpan.FromSeconds(5); // Vérifie toutes les 5 secondes
+            processCheckTimer.Tick += ProcessCheckTimer_Tick;
+            processCheckTimer.Start();
+        }
+
+        private void ProcessCheckTimer_Tick(object sender, EventArgs e)
+        {
+            if (IsProcessRunning("calc")) // "calc" est le nom du processus pour la calculatrice
+            {
+                processCheckTimer.Stop(); // Arrête le timer
+                this.Close(); // Ferme l'application
+            }
+        }
+
+        private bool IsProcessRunning(string processName)
+        {
+            foreach (Process proc in Process.GetProcesses())
+            {
+                if (proc.ProcessName.ToLower().Contains(processName.ToLower()))
+                    return true;
+            }
+            return false;
+        }
+
+        private void EncryptCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+        }
+
     }
 }

@@ -13,7 +13,7 @@
             <MenuItem Header="File">
                 <MenuItem Header="Exit" Click="Exit_Click"/>
             </MenuItem>
-            <MenuItem Header="Settings" Click="MenuItem_Click" >
+            <MenuItem Header="Settings" Click="MenuItem_Click_1">
                 <MenuItem Header="Configure Backup" Click="ConfigureBackup_Click"/>
                 <MenuItem Header="Language">
                     <MenuItem Header="English" Click="SetLanguage_English"/>
@@ -37,9 +37,9 @@
                 <Button Content="Pause" Margin="5" />
                 <Button Content="Stop" Margin="5" />
             </ToolBar>
-            
 
-            <TextBox Grid.Row="2" x:Name="logTextBox" Margin="5" Height="100" VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
+
+            <TextBox Grid.Row="2" x:Name="logTextBox" Margin="5" Height="100" VerticalScrollBarVisibility="Auto" IsReadOnly="True" TextChanged="logTextBox_TextChanged"/>
             <ScrollViewer Grid.Row="1">
                 
                 <ItemsControl ItemsSource="{Binding Jobs}">
