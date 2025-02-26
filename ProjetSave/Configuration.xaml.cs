@@ -65,12 +65,20 @@ namespace ProjetSave
                 IsEncrypted = EncryptCheckBox.IsChecked ?? false
             };
 
+
             // Créer un nouveau JobViewModel avec les informations saisies
             JobViewModel newJob = new JobViewModel(mainWindow.BackupManager, newBackupJob, mainWindow.Jobs)
+
+           
+
+            // Créer un nouveau JobViewModel avec les informations saisies
+            
+
             {
                 Name = JobNameTextbox.Text,
                 SourceDirectory = sourceTextBox.Text,
                 TargetDirectory = targetTextBox.Text,
+
                 BackupType = (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString()),
                 IsEncrypted = EncryptCheckBox.IsChecked ?? false
             };

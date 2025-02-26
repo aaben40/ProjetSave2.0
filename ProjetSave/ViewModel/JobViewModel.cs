@@ -56,6 +56,12 @@ namespace ProjetSave.ViewModel
             set => SetProperty(ref isEncrypted, value);
         }
 
+
+        
+        
+
+
+
         // Commandes pour exécuter et supprimer le job
         public ICommand ExecuteCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
@@ -72,6 +78,7 @@ namespace ProjetSave.ViewModel
             this.parentCollection = parent;
             ExecuteCommand = new RelayCommand(param => ExecuteJob());
             DeleteCommand = new RelayCommand(param => DeleteJob());
+
 
         }
 
@@ -99,11 +106,13 @@ namespace ProjetSave.ViewModel
             }
         }
 
+
         private void ExecuteJob()
         {
             backupManager.ExecuteJob(backupJob);
 
         }
+
     }
 
 
