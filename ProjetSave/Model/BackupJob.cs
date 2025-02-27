@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 using System.IO;
 using ProjetSave.Service;
 using System.Diagnostics;
+
+using System.ComponentModel;
+
 using System.Security.Cryptography;
 using System.Windows.Controls;
 using System.Windows;
+
 
 namespace ProjetSave.Model
 {
@@ -19,17 +23,72 @@ namespace ProjetSave.Model
     }
     public class BackupJob
     {
+
+        private CancellationTokenSource? cancellationTokenSource;
+        private Task? currentTask;
+        private bool isPaused;
         public string Name { get; set; }
         public string SourceDirectory { get; set; }
         public string TargetDirectory { get; set; }
         public BackupType Type { get; set; }
         public bool IsEncrypted { get; set; }
         public long EncryptionTimeMs { get; set; }
+        private int progress;
+        public int Progress
+        {
+            get => progress;
+            set
+            {
+                if (progress != value)
+                {
+                    progress = value;
+                    Console.WriteLine($"Progress updated to {progress}%");
+                    OnPropertyChanged(nameof(Progress));
+                }
+            }
+        }
 
-        
+
+        private int totalFiles;
+        public int TotalFiles
+        {
+            get => totalFiles;
+            set
+            {
+                if (totalFiles != value)
+                {
+                    totalFiles = value;
+                    OnPropertyChanged(nameof(TotalFiles));
+                }
+            }
+        }
+
+        private int filesCopied;
+        public int FilesCopied
+        {
+            get => filesCopied;
+            set
+            {
+                if (filesCopied != value)
+                {
+                    filesCopied = value;
+                    OnPropertyChanged(nameof(FilesCopied));
+                    Progress = (FilesCopied * 100) / TotalFiles;
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
 
         public long TransferTimeMs { get; set; }
         public long EncryptionTime { get; set; }
+        public int? Priority { get; set; }
 
         public BackupJob(string name, string sourceDiretory, string targetDiretory, BackupType type)
         {
@@ -37,10 +96,10 @@ namespace ProjetSave.Model
             SourceDirectory = sourceDiretory;
             TargetDirectory = targetDiretory;
             Type = type;
-            
+
         }
 
-        public void Execute()
+        public void Execute(CancellationToken token)
         {
             // Assurez-vous que les chemins sont validés
             if (!ValidatePaths())
@@ -51,6 +110,7 @@ namespace ProjetSave.Model
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
+
 
             try
             {
@@ -94,11 +154,13 @@ namespace ProjetSave.Model
                 string encryptedFilePath = destPath + ".aes";
                 EncryptFile(destPath, encryptedFilePath);
                 File.Delete(destPath);  // Supprimez le fichier original si vous ne voulez conserver que la version cryptée
+
             }
         }
 
 
         private void CopyDirectory(string sourceDir, string targetDir)
+
         {
             // Créer le dossier de destination s'il n'existe pas
             Directory.CreateDirectory(targetDir);
@@ -117,7 +179,74 @@ namespace ProjetSave.Model
         }
 
 
-        private bool ValidatePaths()
+        //private void CopyFile(string sourcePath, string targetPath)
+        //{
+        //    string fileName = Path.GetFileName(sourcePath);
+        //    string destPath = Path.Combine(targetPath, fileName);
+        //    File.Copy(sourcePath, destPath, true);
+        //    Console.WriteLine($"File copied from {sourcePath} to {destPath}");
+        //}
+
+        //private void CopyDirectory(string sourceDir, string targetDir)
+        //{
+        //    // Créer le dossier de destination s'il n'existe pas
+        //    Directory.CreateDirectory(targetDir);
+
+        //    foreach (var file in Directory.GetFiles(sourceDir))
+        //    {
+        //        string fileName = Path.GetFileName(file);
+        //        string destFile = Path.Combine(targetDir, fileName);
+        //        File.Copy(file, destFile, true);
+        //    }
+
+        //    foreach (var dir in Directory.GetDirectories(sourceDir))
+        //    {
+        //        string dirName = Path.GetFileName(dir);
+        //        string destDir = Path.Combine(targetDir, dirName);
+        //        CopyDirectory(dir, destDir);
+        //    }
+        //}
+
+        private void CopyFile(string sourcePath, string targetPath, CancellationToken token)
+        {
+            string fileName = Path.GetFileName(sourcePath);
+            string destPath = Path.Combine(targetPath, fileName);
+            using (FileStream sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read))
+            using (FileStream destStream = new FileStream(destPath, FileMode.Create, FileAccess.Write))
+            {
+                byte[] buffer = new byte[81920];
+                int bytesRead;
+                while ((bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    token.ThrowIfCancellationRequested();
+                    destStream.Write(buffer, 0, bytesRead);
+                }
+            }
+            Console.WriteLine($"File copied from {sourcePath} to {destPath}");
+        }
+
+        private void CopyDirectory(string sourceDir, string targetDir, CancellationToken token)
+        {
+            // Créer le dossier de destination s'il n'existe pas
+            Directory.CreateDirectory(targetDir);
+
+            foreach (var file in Directory.GetFiles(sourceDir))
+            {
+                string fileName = Path.GetFileName(file);
+                string destFile = Path.Combine(targetDir, fileName);
+                CopyFile(file, destFile, token);
+            }
+
+            foreach (var dir in Directory.GetDirectories(sourceDir))
+            {
+                string dirName = Path.GetFileName(dir);
+                string destDir = Path.Combine(targetDir, dirName);
+                CopyDirectory(dir, destDir, token);
+
+            }
+        }
+
+        private void EncryptFile()
         {
             // Valider que les chemins source existent et que le chemin de destination est valide
             return File.Exists(SourceDirectory) || Directory.Exists(SourceDirectory);
@@ -153,8 +282,42 @@ namespace ProjetSave.Model
                 }
             }
 
-            Console.WriteLine("Encryption completed for " + outputFile);
+
+        public void Pause()
+        {
+            // Logique pour mettre en pause le job
+            Console.WriteLine($"Job {Name} paused.");
+            if (currentTask != null && !isPaused)
+            {
+                isPaused = true;
+                cancellationTokenSource?.Cancel();
+                Console.WriteLine($"Job {Name} paused.");
+            }
         }
+
+        public void Resume()
+        {
+            // Logique pour reprendre le job
+            Console.WriteLine($"Job {Name} resumed.");
+            if (isPaused)
+            {
+                isPaused = false;
+                cancellationTokenSource = new CancellationTokenSource();
+                var token = cancellationTokenSource.Token;
+                currentTask = Task.Run(() => Execute(token), token);
+                Console.WriteLine($"Job {Name} resumed.");
+            }
+        }
+
+        public void Stop()
+        {
+            // Logique pour arrêter le job
+            Console.WriteLine($"Job {Name} stopped.");
+            cancellationTokenSource?.Cancel();
+        }
+
+
+
         // Dans BackupJob.cs
         public void EncryptAllFilesInTarget()
         {
@@ -170,5 +333,6 @@ namespace ProjetSave.Model
                 }
             }
         }
+
     }
 }

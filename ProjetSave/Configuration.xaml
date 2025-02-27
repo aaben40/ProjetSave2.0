@@ -46,6 +46,8 @@
             <Button Content="Save" Margin="5" Width="80" Click="SaveButton_Click"/>
             <Button Content="Cancel" Margin="5" Width="80" Click="CancelButton_Click"/>
         </StackPanel>
+        <TextBlock HorizontalAlignment="Left" Margin="10,14,0,0" Grid.Row="4" TextWrapping="Wrap" VerticalAlignment="Top" Width="59"><Run Language="fr-fr" Text="Job Name"/></TextBlock>
+        <TextBox Grid.Row="4" Grid.Column="1" x:Name="JobNameTextbox" Margin="5,10,247,10" />
 
         <!-- Status Bar for Feedback -->
         <StatusBar Grid.Row="5" Grid.ColumnSpan="2">

@@ -1,4 +1,9 @@
+
+﻿using ProjetSave.Model;
+using ProjetSave.ViewModel;
+
 ﻿using Microsoft.Win32;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +30,12 @@ namespace ProjetSave
     public partial class Configuration : Window
     {
 
+
+
+            
+           
+
+
         private BackupJob _backupJob;
 
         public Configuration(BackupJob job)
@@ -39,6 +50,7 @@ namespace ProjetSave
         {
             InitializeComponent();
             ViewModel = new ViewModel.BackupJobViewModel();
+
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -62,12 +74,16 @@ namespace ProjetSave
                 (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString())
             )
             {
+
                 IsEncrypted = EncryptCheckBox.IsChecked ?? false
+
             };
 
 
             // Créer un nouveau JobViewModel avec les informations saisies
-            JobViewModel newJob = new JobViewModel(mainWindow.BackupManager, newBackupJob, mainWindow.Jobs)
+
+            JobViewModel newJob = new JobViewModel(mainWindow.BackupManager, newBackupJob, mainViewModel.Jobs)
+
 
            
 
@@ -76,18 +92,24 @@ namespace ProjetSave
 
             {
                 Name = JobNameTextbox.Text,
-                SourceDirectory = sourceTextBox.Text,
-                TargetDirectory = targetTextBox.Text,
 
-                BackupType = (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString()),
-                IsEncrypted = EncryptCheckBox.IsChecked ?? false
+                sourceDirectory = sourceTextBox.Text,
+                targetDirectory = targetTextBox.Text,
+
+                backupType = (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString()),
+                isEncrypted = encryptCheckBox.IsChecked ?? false
+                
             };
 
             // Ajouter le nouveau job à la collection dans MainViewModel
-            mainWindow.Jobs.Add(newJob);
+            //mainWindow.Jobs.Add(newJob);
+            mainViewModel.Jobs.Add(newJob);
 
             // Fermer la fenêtre de configuration
             this.Close();
+
+
+          
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

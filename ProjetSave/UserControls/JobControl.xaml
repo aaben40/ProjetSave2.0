@@ -12,18 +12,29 @@
             <!-- Nom du job -->
             <ColumnDefinition Width="*"/>
             <!-- Bouton Exécuter -->
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
             <!-- Bouton Supprimer -->
+            <ColumnDefinition Width="*"/>
+            <!-- Priorité de seauvegarde -->
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Nom du job -->
         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="5" Grid.Column="0"/>
 
+        <TextBox Text="{Binding Priority, UpdateSourceTrigger=PropertyChanged}" Margin="5" Grid.Column="1"/>
+        <!-- ProgressBar -->
+        <ProgressBar Value="{Binding Progress}" Maximum="100" Grid.Column="2" Margin="5" Foreground="Green"/>
+
         <!-- Bouton Exécuter -->
-        <Button Content="Exécuter" Command="{Binding ExecuteCommand}" Margin="5" Grid.Column="1" FontSize="18" Click="Button_Click"/>
+
+
+        <Button Content="Exécuter" Command="{Binding ExecuteCommand}" Margin="5" Grid.Column="3" FontSize="18" Click="Button_Click"/>
+
+
 
         <!-- Bouton Supprimer -->
-        <Button Content="Supprimer" Command="{Binding DeleteCommand}" Margin="5" Grid.Column="2" FontSize="18"/>
+        <Button Content="Supprimer" Command="{Binding DeleteCommand}" Margin="5" Grid.Column="4" FontSize="18"/>
     </Grid>
 
 

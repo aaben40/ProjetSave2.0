@@ -1,12 +1,27 @@
+
+
+using ProjetSave.Controller;
+using ProjetSave.ViewModel;
+
+﻿
+using ProjetSave.Service;
+
+using System.Collections.Generic;
+
+
 ﻿using ProjetSave.Controller;
 using ProjetSave.ViewModel;
 using ProjetSave.Service; // Assurez-vous d'ajouter l'espace de nom pour Logger
+
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+
 using System.Windows.Data;
 using System.Windows.Documents;
+
+
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -24,15 +39,39 @@ namespace ProjetSave
     /// </summary>
     public partial class MainWindow : Window
     {
+
+
+      
+        //public ICommand StartCommand { get; }
+        
+        public MainViewModel ViewModel { get; } = new MainViewModel();  
+
+
         public BackupManager BackupManager { get; }
         public ObservableCollection<JobViewModel> Jobs { get; private set; }
         private Logger logger;  // Ajout d'un membre Logger
         DispatcherTimer processCheckTimer;
+
         public MainWindow()
         {
             InitializeComponent();
             InitializeProcessCheckTimer();
             Jobs = new ObservableCollection<JobViewModel>();
+
+
+             
+
+            
+            DataContext = ViewModel;
+            TextBox? logTextBox = this.FindName("logTextBox") as TextBox;
+            if (logTextBox != null)
+            {
+                Console.SetOut(new TextBoxOutputter(logTextBox, Dispatcher));
+            }
+            // Appliquer la langue sauvegardée
+            //SetLanguage(Properties.Settings.Default.Language);
+            //StartCommand = new RelayCommand(param => BackupManager.ExecuteAllJobs(Jobs));
+
             logger = new Logger("C:\\Users\\Utilisateur\\source\\repos\\ProjetSave2.0\\LOGS\\logfile.json");  // Configurez votre chemin de log ici
             BackupManager = new BackupManager(logger);
             DataContext = this;
@@ -59,15 +98,22 @@ namespace ProjetSave
             });
         }
 
+
         private void AddJob(JobViewModel job)
         {
             Jobs.Add(job);
         }
 
+       
+
         private void ConfigureBackup_Click(object sender, RoutedEventArgs e)
         {
-            Configuration configWindow = new Configuration();
+            Configuration configWindow = new Configuration(ViewModel);
             configWindow.ShowDialog(); // Utilisez ShowDialog pour une fenêtre modale si nécessaire
+
+            //Configuration configWindow = new Configuration();
+            //configWindow.ShowDialog();
+
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
@@ -75,10 +121,7 @@ namespace ProjetSave
             this.Close();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+     
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
@@ -99,6 +142,21 @@ namespace ProjetSave
         {
 
         }
+
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Configuration configWindow = new Configuration(ViewModel);
+            configWindow.ShowDialog();
+        }
+
+       
+
+        private void logTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
         private void MenuItem_Click_1(object sender, RoutedEventArgs e)
         {
 
@@ -234,6 +292,7 @@ namespace ProjetSave
             SetLanguage("fr");
 
         }
+
 
     }
 }
