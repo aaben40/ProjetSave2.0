@@ -82,14 +82,7 @@ namespace ProjetSave
 
             // Créer un nouveau JobViewModel avec les informations saisies
 
-            JobViewModel newJob = new JobViewModel(mainWindow.BackupManager, newBackupJob, mainViewModel.Jobs)
-
-
-           
-
-            // Créer un nouveau JobViewModel avec les informations saisies
-            
-
+            JobViewModel newJob = new JobViewModel(mainWindow.BackupManager, newBackupJob, mainWindow.Jobs)
             {
                 Name = JobNameTextbox.Text,
 
@@ -97,13 +90,13 @@ namespace ProjetSave
                 targetDirectory = targetTextBox.Text,
 
                 backupType = (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString()),
-                isEncrypted = encryptCheckBox.IsChecked ?? false
+                isEncrypted = EncryptCheckBox.IsChecked ?? false
                 
             };
 
             // Ajouter le nouveau job à la collection dans MainViewModel
-            //mainWindow.Jobs.Add(newJob);
-            mainViewModel.Jobs.Add(newJob);
+            mainWindow.Jobs.Add(newJob);
+            //mainViewModel.Jobs.Add(newJob);
 
             // Fermer la fenêtre de configuration
             this.Close();

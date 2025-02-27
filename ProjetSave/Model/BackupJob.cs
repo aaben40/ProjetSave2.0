@@ -141,42 +141,54 @@ namespace ProjetSave.Model
         }
 
 
-        private void CopyFile(string sourcePath, string targetPath)
+        private void CopyFile(string sourcePath, string targetPath, CancellationToken token = default)
         {
             string fileName = Path.GetFileName(sourcePath);
             string destPath = Path.Combine(targetPath, fileName);
-            File.Copy(sourcePath, destPath, true);
+
+            using (FileStream sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read))
+            using (FileStream destStream = new FileStream(destPath, FileMode.Create, FileAccess.Write))
+            {
+                byte[] buffer = new byte[81920];
+                int bytesRead;
+                while ((bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    token.ThrowIfCancellationRequested();
+                    destStream.Write(buffer, 0, bytesRead);
+                }
+            }
+
             Console.WriteLine($"File copied from {sourcePath} to {destPath}");
 
-            // Vérifier si le cryptage est activé
+            // Vérifier si le cryptage est activé - Check if encryption is enabled
             if (IsEncrypted)
             {
                 string encryptedFilePath = destPath + ".aes";
                 EncryptFile(destPath, encryptedFilePath);
-                File.Delete(destPath);  // Supprimez le fichier original si vous ne voulez conserver que la version cryptée
-
+                File.Delete(destPath);  // Supprimez le fichier original si vous ne voulez conserver que la version cryptée - Delete the original file if you only want to keep the encrypted version
             }
         }
 
 
-        private void CopyDirectory(string sourceDir, string targetDir)
 
+        private void CopyDirectory(string sourceDir, string targetDir, CancellationToken token = default)
         {
-            // Créer le dossier de destination s'il n'existe pas
+            // Créer le dossier de destination s'il n'existe pas - Create the destination folder if it doesn't exist
             Directory.CreateDirectory(targetDir);
 
             foreach (var file in Directory.GetFiles(sourceDir))
             {
                 string destFile = Path.Combine(targetDir, Path.GetFileName(file));
-                CopyFile(file, destFile);  // CopyFile inclut maintenant le cryptage si activé
+                CopyFile(file, destFile, token);  // CopyFile inclut maintenant le cryptage si activé - CopyFile now includes encryption if enabled
             }
 
             foreach (var dir in Directory.GetDirectories(sourceDir))
             {
                 string targetSubDir = Path.Combine(targetDir, Path.GetFileName(dir));
-                CopyDirectory(dir, targetSubDir);  // Appliquer récursivement la même logique
+                CopyDirectory(dir, targetSubDir, token);  // Appliquer récursivement la même logique - Apply the same logic recursively
             }
         }
+
 
 
         //private void CopyFile(string sourcePath, string targetPath)
@@ -207,46 +219,8 @@ namespace ProjetSave.Model
         //    }
         //}
 
-        private void CopyFile(string sourcePath, string targetPath, CancellationToken token)
-        {
-            string fileName = Path.GetFileName(sourcePath);
-            string destPath = Path.Combine(targetPath, fileName);
-            using (FileStream sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read))
-            using (FileStream destStream = new FileStream(destPath, FileMode.Create, FileAccess.Write))
-            {
-                byte[] buffer = new byte[81920];
-                int bytesRead;
-                while ((bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    token.ThrowIfCancellationRequested();
-                    destStream.Write(buffer, 0, bytesRead);
-                }
-            }
-            Console.WriteLine($"File copied from {sourcePath} to {destPath}");
-        }
 
-        private void CopyDirectory(string sourceDir, string targetDir, CancellationToken token)
-        {
-            // Créer le dossier de destination s'il n'existe pas
-            Directory.CreateDirectory(targetDir);
-
-            foreach (var file in Directory.GetFiles(sourceDir))
-            {
-                string fileName = Path.GetFileName(file);
-                string destFile = Path.Combine(targetDir, fileName);
-                CopyFile(file, destFile, token);
-            }
-
-            foreach (var dir in Directory.GetDirectories(sourceDir))
-            {
-                string dirName = Path.GetFileName(dir);
-                string destDir = Path.Combine(targetDir, dirName);
-                CopyDirectory(dir, destDir, token);
-
-            }
-        }
-
-        private void EncryptFile()
+        private bool ValidatePaths()
         {
             // Valider que les chemins source existent et que le chemin de destination est valide
             return File.Exists(SourceDirectory) || Directory.Exists(SourceDirectory);
@@ -281,6 +255,7 @@ namespace ProjetSave.Model
                     }
                 }
             }
+        }
 
 
         public void Pause()

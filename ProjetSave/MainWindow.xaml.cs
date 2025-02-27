@@ -108,7 +108,7 @@ namespace ProjetSave
 
         private void ConfigureBackup_Click(object sender, RoutedEventArgs e)
         {
-            Configuration configWindow = new Configuration(ViewModel);
+            Configuration configWindow = new Configuration();
             configWindow.ShowDialog(); // Utilisez ShowDialog pour une fenêtre modale si nécessaire
 
             //Configuration configWindow = new Configuration();
@@ -146,7 +146,7 @@ namespace ProjetSave
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Configuration configWindow = new Configuration(ViewModel);
+            Configuration configWindow = new Configuration();
             configWindow.ShowDialog();
         }
 
@@ -162,10 +162,10 @@ namespace ProjetSave
 
         }
 
-        private void logTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        /*private void logTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             // Cette méthode peut rester vide si elle n'est pas utilisée
-        }
+        }*/
 
 
         private void InitializeProcessCheckTimer()
