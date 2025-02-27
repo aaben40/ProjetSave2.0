@@ -28,7 +28,9 @@
 
         <!-- Bouton Exécuter -->
 
+
         <Button Content="Exécuter" Command="{Binding ExecuteCommand}" Margin="5" Grid.Column="3" FontSize="18" Click="Button_Click"/>
+
 
 
         <!-- Bouton Supprimer -->
