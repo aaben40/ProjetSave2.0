@@ -30,6 +30,7 @@ namespace ProjetSave
         {
             InitializeComponent();
             mainViewModel = viewModel;
+
             
            
 
@@ -60,7 +61,7 @@ namespace ProjetSave
 
 
             // Créer un nouveau JobViewModel avec les informations saisies
-            JobViewModel newJob = new JobViewModel(mainWindow.BackupManager, newBackupJob, mainWindow.Jobs)
+            JobViewModel newJob = new JobViewModel(mainWindow.BackupManager, newBackupJob, mainViewModel.Jobs)
 
            
 

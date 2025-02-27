@@ -22,10 +22,21 @@ namespace ProjetSave.ViewModel
         public string targetDirectory = "";
         public BackupType backupType;
         public bool isEncrypted = false;
-      
 
 
 
+        public int Progress
+        {
+            get => backupJob.Progress;
+            set
+            {
+                if (backupJob.Progress != value)
+                {
+                    backupJob.Progress = value;
+                    OnPropertyChanged(nameof(Progress));
+                }
+            }
+        }
         // Propriété pour le nom du job
         public string Name
         {
@@ -76,6 +87,7 @@ namespace ProjetSave.ViewModel
             parentCollection = parent;
             ExecuteCommand = new RelayCommand(param => ExecuteJob());
             DeleteCommand = new RelayCommand(param => DeleteJob());
+            
         }
 
        
@@ -105,11 +117,12 @@ namespace ProjetSave.ViewModel
         }
 
 
-        private void ExecuteJob()
+        private async void ExecuteJob()
         {
             try
             {
-                backupManager.ExecuteJob(backupJob);
+                await backupManager.ExecuteJob(backupJob);
+                Console.WriteLine(parentCollection.Count);
                 parentCollection.Remove(this);
             }
             catch (Exception ex)

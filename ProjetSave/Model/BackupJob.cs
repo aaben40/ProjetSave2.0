@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using ProjetSave.Service;
 using System.Diagnostics;
+using System.ComponentModel;
 
 namespace ProjetSave.Model
 {
@@ -26,7 +27,57 @@ namespace ProjetSave.Model
         public BackupType Type { get; set; }
         public bool IsEncrypted { get; set; }
         public long EncryptionTimeMs { get; set; }
+        private int progress;
+        public int Progress
+        {
+            get => progress;
+            set
+            {
+                if (progress != value)
+                {
+                    progress = value;
+                    Console.WriteLine($"Progress updated to {progress}%");
+                    OnPropertyChanged(nameof(Progress));
+                }
+            }
+        }
 
+
+        private int totalFiles;
+        public int TotalFiles
+        {
+            get => totalFiles;
+            set
+            {
+                if (totalFiles != value)
+                {
+                    totalFiles = value;
+                    OnPropertyChanged(nameof(TotalFiles));
+                }
+            }
+        }
+
+        private int filesCopied;
+        public int FilesCopied
+        {
+            get => filesCopied;
+            set
+            {
+                if (filesCopied != value)
+                {
+                    filesCopied = value;
+                    OnPropertyChanged(nameof(FilesCopied));
+                    Progress = (FilesCopied * 100) / TotalFiles;
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
 
         public long TransferTimeMs { get; set; }

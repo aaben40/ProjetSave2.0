@@ -28,7 +28,7 @@ namespace ProjetSave.Controller
         private readonly Logger logger;
 
         public BackupManager(Logger logger)
-        { 
+        {
             this.backupJobs = new List<BackupJob>();
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -47,7 +47,7 @@ namespace ProjetSave.Controller
             if (job == null)
             {
                 throw new ArgumentNullException(nameof(job), "Backup job cannot be null");
-                
+
             }
             backupJobs.Add(job);
             logger.logAction(new LogEntry
@@ -99,7 +99,7 @@ namespace ProjetSave.Controller
         //                throw; // Relancez l'exception pour une gestion plus générale des erreurs
         //            }
         //        }
-        private void CopyModifiedFiles(string sourceDir, string targetDir)
+        private async Task CopyModifiedFiles(string sourceDir, string targetDir)
         {
             // Copiez chaque fichier du répertoire source
             foreach (string file in Directory.GetFiles(sourceDir))
@@ -120,10 +120,10 @@ namespace ProjetSave.Controller
                 {
                     Directory.CreateDirectory(targetDirectoryPath);
                 }
-                CopyModifiedFiles(directory, targetDirectoryPath);
+                await CopyModifiedFiles(directory, targetDirectoryPath);
             }
         }
-        private void ExecuteIncrementalBackup(BackupJob job)
+        private async Task ExecuteIncrementalBackup(BackupJob job)
         {
             Console.WriteLine($"Performing incremental backup for {job.Name}");
             try
@@ -137,7 +137,7 @@ namespace ProjetSave.Controller
                     Directory.CreateDirectory(job.TargetDirectory);
 
                 // Copiez les modifications incrémentielles
-                CopyModifiedFiles(job.SourceDirectory, job.TargetDirectory);
+                await CopyModifiedFiles(job.SourceDirectory, job.TargetDirectory);
                 Console.WriteLine("Incremental backup completed successfully.");
             }
             catch (Exception ex)
@@ -146,7 +146,7 @@ namespace ProjetSave.Controller
                 throw; // Relancer l'exception pour permettre une gestion globale des erreurs
             }
         }
-        private void ExecuteFullBackup(BackupJob job)
+        private async Task ExecuteFullBackup(BackupJob job)
         {
             Console.WriteLine($"Performing full backup for {job.Name}");
             try
@@ -160,7 +160,7 @@ namespace ProjetSave.Controller
                     Directory.CreateDirectory(job.TargetDirectory);
 
                 // Copiez tous les fichiers et répertoires de manière récursive
-                CopyDirectory(job.SourceDirectory, job.TargetDirectory);
+                await CopyDirectory(job.SourceDirectory, job.TargetDirectory,job);
                 Console.WriteLine("Backup completed successfully.");
             }
             catch (Exception ex)
@@ -179,29 +179,33 @@ namespace ProjetSave.Controller
             return stopwatch.ElapsedMilliseconds;
         }
 
-        
+
 
         private long CalculateFileSize(string path)
         {
             // Method to calculate the total size of files in a directory
             return new DirectoryInfo(path).EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
         }
-        public  void ExecuteJob(BackupJob job)
+        public async Task ExecuteJob(BackupJob job)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             try
             {
                 ValidatePaths(job);
-                 // Simulate some delay for demonstration
+                // Simulate some delay for demonstration
+                // Rapport initial de progression
+                job.TotalFiles = Directory.GetFiles(job.SourceDirectory, "*", SearchOption.AllDirectories).Length;
+
                 switch (job.Type)
                 {
                     case BackupType.Full:
-                        ExecuteFullBackup(job);
+                        await ExecuteFullBackup(job);
                         break;
                     case BackupType.Incremental:
-                        ExecuteIncrementalBackup(job);
+                        await ExecuteIncrementalBackup(job);
                         break;
                 }
+
 
                 stopwatch.Stop();
                 job.TransferTimeMs = stopwatch.ElapsedMilliseconds;
@@ -223,6 +227,8 @@ namespace ProjetSave.Controller
             }
             catch (Exception ex)
             {
+                // En cas d'erreur, réinitialiser la progression
+
                 logger.logAction(new LogEntry
                 {
                     BackupName = job.Name,
@@ -275,7 +281,7 @@ namespace ProjetSave.Controller
             }
         }
 
-        
+
         public void ExecuteAllJobs(ObservableCollection<JobViewModel> jobViewModels)
         {
             var priorities = jobViewModels
@@ -336,23 +342,60 @@ namespace ProjetSave.Controller
             }
         }
 
-        private void CopyDirectory(string sourceDir, string targetDir)
+        //private void CopyDirectory(string sourceDir, string targetDir)
+        //{
+        //    // Copiez chaque fichier dans le répertoire
+        //    Directory.CreateDirectory(targetDir);
+        //    Console.WriteLine($"Creating target directory: {targetDir}");
+        //    foreach (string file in Directory.GetFiles(sourceDir))
+        //    {
+        //        string targetFilePath = Path.Combine(targetDir, Path.GetFileName(file));
+        //        Console.WriteLine($"Copying file from {file} to {targetFilePath}");
+        //        File.Copy(file, targetFilePath, true); // true pour écraser les fichiers existants
+
+        //    }
+        //}
+        private async Task CopyDirectory(string sourceDir, string targetDir, BackupJob job)
         {
-            // Copiez chaque fichier dans le répertoire
+            // Créer le dossier de destination s'il n'existe pas
             Directory.CreateDirectory(targetDir);
-            foreach (string file in Directory.GetFiles(sourceDir))
+
+            foreach (var file in Directory.GetFiles(sourceDir))
             {
-                string targetFilePath = Path.Combine(targetDir, Path.GetFileName(file));
-                File.Copy(file, targetFilePath, true); // true pour écraser les fichiers existants
+                string fileName = Path.GetFileName(file);
+                string destFile = Path.Combine(targetDir, fileName);
+                await CopyFile(file, destFile, job);
             }
 
-            // Copiez récursivement chaque sous-répertoire
-            foreach (string directory in Directory.GetDirectories(sourceDir))
+            foreach (var dir in Directory.GetDirectories(sourceDir))
             {
-                string targetDirectoryPath = Path.Combine(targetDir, Path.GetFileName(directory));
-                CopyDirectory(directory, targetDirectoryPath);
+                string dirName = Path.GetFileName(dir);
+                string destDir = Path.Combine(targetDir, dirName);
+                await CopyDirectory(dir, destDir, job);
             }
         }
 
+        private async Task CopyFile(string sourcePath, string targetPath, BackupJob job)
+        {
+            string fileName = Path.GetFileName(sourcePath);
+            string destPath = targetPath;
+            // Vérifiez si targetPath contient déjà le nom du fichier
+            if (!targetPath.EndsWith(fileName))
+            {
+                destPath = Path.Combine(targetPath, fileName);
+            }
+            using (FileStream sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read))
+            using (FileStream destStream = new FileStream(destPath, FileMode.Create, FileAccess.Write))
+            {
+                byte[] buffer = new byte[81920];
+                int bytesRead;
+                while ((bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    destStream.Write(buffer, 0, bytesRead);
+                }
+            }
+            job.FilesCopied++;
+            Console.WriteLine($"File copied from {sourcePath} to {destPath}");
+        }
     }
 }
