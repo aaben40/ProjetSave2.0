@@ -59,8 +59,8 @@ namespace ProjetSave
 
         private void ConfigureBackup_Click(object sender, RoutedEventArgs e)
         {
-            Configuration configWindow = new Configuration(ViewModel);
-            configWindow.ShowDialog(); // Utilisez ShowDialog pour une fenêtre modale si nécessaire
+            //Configuration configWindow = new Configuration(ViewModel);
+            //configWindow.ShowDialog(); // Utilisez ShowDialog pour une fenêtre modale si nécessaire
 
             //Configuration configWindow = new Configuration();
             //configWindow.ShowDialog();

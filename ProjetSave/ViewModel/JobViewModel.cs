@@ -54,6 +54,9 @@ namespace ProjetSave.ViewModel
         // Commandes pour Exécuter et Supprimer le job
         public ICommand ExecuteCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
+        public ICommand StopCommand { get; private set; }
+        //public ICommand PauseCommand { get; private set; }
+        //public ICommand StopCommand { get; private set; }
 
         // Référence à la collection parente pour pouvoir se supprimer
         private ObservableCollection<JobViewModel> parentCollection;
@@ -87,15 +90,22 @@ namespace ProjetSave.ViewModel
             parentCollection = parent;
             ExecuteCommand = new RelayCommand(param => ExecuteJob());
             DeleteCommand = new RelayCommand(param => DeleteJob());
-            
+            StopCommand = new RelayCommand(param => StopJob());
+            //Progress = 20;
+
         }
 
        
         
-
+        private void StopJob()
+        {
+            backupJob.Stop();
+            Console.WriteLine($"Stopped job: {Name}");
+        }
         // Méthode pour supprimer le job de la collection parente
         private void DeleteJob()
         {
+            backupJob.Stop();
             parentCollection.Remove(this);
             Console.WriteLine($"Deleted job: {Name}");
         }

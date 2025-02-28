@@ -18,7 +18,7 @@ namespace ProjetSave.Model
     public class BackupJob
     {
 
-        private CancellationTokenSource? cancellationTokenSource;
+        public CancellationTokenSource? cancellationTokenSource;
         private Task? currentTask;
         private bool isPaused;
         public string Name { get; set; }
@@ -90,6 +90,7 @@ namespace ProjetSave.Model
             SourceDirectory = sourceDiretory;
             TargetDirectory = targetDiretory;
             Type = type;
+            cancellationTokenSource = new CancellationTokenSource();
 
         }
 
@@ -274,6 +275,7 @@ namespace ProjetSave.Model
             // Logique pour arrêter le job
             Console.WriteLine($"Job {Name} stopped.");
             cancellationTokenSource?.Cancel();
+            
         }
 
 
