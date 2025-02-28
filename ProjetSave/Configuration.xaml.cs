@@ -1,5 +1,9 @@
+
 ﻿using ProjetSave.Model;
 using ProjetSave.ViewModel;
+
+﻿using Microsoft.Win32;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +17,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Forms;
+using System.IO;
+using ProjetSave.Model;
+using ProjetSave.ViewModel;
 
 namespace ProjetSave
 {
@@ -22,17 +30,26 @@ namespace ProjetSave
     public partial class Configuration : Window
     {
 
-       
 
-        private ViewModel.MainViewModel mainViewModel;
-
-        public Configuration(ViewModel.MainViewModel viewModel)
-        {
-            InitializeComponent();
-            mainViewModel = viewModel;
 
             
            
+
+
+        private BackupJob _backupJob;
+
+        public Configuration(BackupJob job)
+        {
+            InitializeComponent();
+            _backupJob = job;
+        }
+
+        private ViewModel.BackupJobViewModel ViewModel;
+
+        public Configuration()
+        {
+            InitializeComponent();
+            ViewModel = new ViewModel.BackupJobViewModel();
 
         }
 
@@ -43,6 +60,7 @@ namespace ProjetSave
             {
                 MessageBox.Show("Main window not available"); return;
             }
+
             if (backupTypeComboBox.SelectedItem == null)
             {
                 MessageBox.Show("Please select a backup type"); return;
@@ -56,12 +74,16 @@ namespace ProjetSave
                 (BackupType)Enum.Parse(typeof(BackupType), ((ComboBoxItem)backupTypeComboBox.SelectedItem).Content.ToString())
             )
             {
-                IsEncrypted = encryptCheckBox.IsChecked ?? false
+
+                IsEncrypted = EncryptCheckBox.IsChecked ?? false
+
             };
 
 
             // Créer un nouveau JobViewModel avec les informations saisies
+
             JobViewModel newJob = new JobViewModel(mainWindow.BackupManager, newBackupJob, mainViewModel.Jobs)
+
 
            
 
@@ -70,6 +92,7 @@ namespace ProjetSave
 
             {
                 Name = JobNameTextbox.Text,
+
                 sourceDirectory = sourceTextBox.Text,
                 targetDirectory = targetTextBox.Text,
 
@@ -85,11 +108,49 @@ namespace ProjetSave
             // Fermer la fenêtre de configuration
             this.Close();
 
+
+          
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        // ...
+
+        private void BrowseSource_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "All files (*.*)|*.*"; // Modifier si nécessaire pour filtrer certains types de fichiers
+            if (openFileDialog.ShowDialog() == true)
+            {
+                sourceTextBox.Text = openFileDialog.FileName;
+            }
+        }
+
+        private void BrowseTarget_Click(object sender, RoutedEventArgs e)
+        {
+            //using (var folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog())
+            //{
+            //    if (folderBrowserDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            //    {
+            //        targetTextBox.Text = folderBrowserDialog.SelectedPath;
+            //    }
+            //}
+        }
+
+        // Exemple de code, supposant que vous avez une instance de BackupJob nommée 'currentJob'
+
+
+        private void EncryptCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void EncryptCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
 }

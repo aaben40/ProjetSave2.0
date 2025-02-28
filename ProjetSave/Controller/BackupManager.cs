@@ -8,9 +8,11 @@ using System.IO;
 using System.Text.Json;
 using ProjetSave.Service;
 using System.Diagnostics;
+
 using ProjetSave.ViewModel;
 using System.Collections.ObjectModel;
 using System.Windows;
+
 
 
 
@@ -33,14 +35,7 @@ namespace ProjetSave.Controller
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        //public long CalculateFileSize(string filePath)
-        //{
-        //    if (File.Exists(filePath))
-        //    {
-        //        return new FileInfo(filePath).Length;
-        //    }
-        //    return 0;
-        //}
+
         // Ajouter un job de sauvegarde
         public void AddJob(BackupJob job)
         {
@@ -132,6 +127,7 @@ namespace ProjetSave.Controller
                 if (!Directory.Exists(job.SourceDirectory))
                     throw new DirectoryNotFoundException($"Cannot find source directory: {job.SourceDirectory}");
 
+
                 // Assurez-vous que le répertoire cible existe ou créez-le
                 if (!Directory.Exists(job.TargetDirectory))
                     Directory.CreateDirectory(job.TargetDirectory);
@@ -215,6 +211,7 @@ namespace ProjetSave.Controller
                     job.EncryptionTimeMs = EncryptFiles(job);
                 }
 
+
                 logger.logAction(new LogEntry
                 {
                     BackupName = job.Name,
@@ -234,7 +231,6 @@ namespace ProjetSave.Controller
             }
             catch (Exception ex)
             {
-                // En cas d'erreur, réinitialiser la progression
 
                 logger.logAction(new LogEntry
                 {
@@ -242,11 +238,12 @@ namespace ProjetSave.Controller
                     SourceFilePath = job.SourceDirectory,
                     TargetFilePath = job.TargetDirectory,
                     FileSize = CalculateFileSize(job.SourceDirectory),
-                    TransferTimeMs = ex.HResult,
-                    EncryptionTimeMs = ex.HResult
+                    TransferTimeMs = ex.HResult,   // 
+                    EncryptionTimeMs = ex.HResult  // 
                 });
             }
         }
+
 
         public void ExecuteSequentialJobs()
         {

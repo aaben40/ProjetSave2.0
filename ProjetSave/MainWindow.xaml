@@ -10,11 +10,15 @@
     <DockPanel>
         
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="File" Click="MenuItem_Click">
+            <MenuItem Header="File">
                 <MenuItem Header="Exit" Click="Exit_Click"/>
             </MenuItem>
-            <MenuItem Header="Settings">
+            <MenuItem Header="Settings" Click="MenuItem_Click_1">
                 <MenuItem Header="Configure Backup" Click="ConfigureBackup_Click"/>
+                <MenuItem Header="Language">
+                    <MenuItem Header="English" Click="SetLanguage_English"/>
+                    <MenuItem Header="Français" Click="SetLanguage_French"/>
+                </MenuItem>
             </MenuItem>
         </Menu>
         <StatusBar DockPanel.Dock="Bottom">
@@ -29,12 +33,14 @@
 
             <ToolBar Grid.Row="0">
 
+
                 <Button Content="Add Job" Margin="5" Click="Button_Click" />
                 <Button Content="Start" Margin="5" Click="Button_Click_1" Command="{Binding StartCommand}" />
                 <Button Content="{Binding PauseButtonText}" Command="{Binding TogglePauseCommand}" Margin="5" />
                 <Button Content="Stop" Margin="5" Command="{Binding StopCommand}" />
+
             </ToolBar>
-            
+
 
             <TextBox Grid.Row="2" x:Name="logTextBox" Margin="5" Height="100" VerticalScrollBarVisibility="Auto" IsReadOnly="True" TextChanged="logTextBox_TextChanged"/>
             <ScrollViewer Grid.Row="1">
