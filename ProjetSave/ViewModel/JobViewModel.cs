@@ -20,6 +20,7 @@ namespace ProjetSave.ViewModel
     {
 
         private string name = "";
+
         private string sourceDirectory = "";
         private string targetDirectory = "";
         private BackupType backupType;
@@ -31,6 +32,13 @@ namespace ProjetSave.ViewModel
         //public BackupType backupType;
         //public bool isEncrypted = false;
 
+
+        // Master
+        //public string sourceDirectory = "";
+        //public string targetDirectory = "";
+       // public BackupType backupType;
+       // public bool isEncrypted = false;
+       // public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public int Progress
@@ -94,8 +102,6 @@ namespace ProjetSave.ViewModel
         private ObservableCollection<JobViewModel> parentCollection;
         private BackupManager backupManager;
         private BackupJob backupJob;
-
-
 
         //public JobViewModel(ObservableCollection<JobViewModel> parent);
         private int? priority;
