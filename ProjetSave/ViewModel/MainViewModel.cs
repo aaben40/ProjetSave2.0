@@ -121,7 +121,7 @@ namespace ProjetSave.ViewModel
         {
             Console.WriteLine("Stopping all jobs");
             IsJobRunning = false;
-            BackupManager.StopAllJobs();
+            BackupManager.StopAllJobs(Jobs);
             OnPropertyChanged(nameof(CanStart));
             OnPropertyChanged(nameof(CanTogglePause));
             OnPropertyChanged(nameof(CanStop));

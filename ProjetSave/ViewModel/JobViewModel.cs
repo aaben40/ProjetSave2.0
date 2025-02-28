@@ -20,11 +20,26 @@ namespace ProjetSave.ViewModel
     {
 
         private string name = "";
-        public string sourceDirectory = "";
-        public string targetDirectory = "";
-        public BackupType backupType;
-        public bool isEncrypted = false;
+
+        private string sourceDirectory = "";
+        private string targetDirectory = "";
+        private BackupType backupType;
+        private bool isEncrypted = false;
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        //public string sourceDirectory = "";
+        //public string targetDirectory = "";
+        //public BackupType backupType;
+        //public bool isEncrypted = false;
+
+
+        // Master
+        //public string sourceDirectory = "";
+        //public string targetDirectory = "";
+       // public BackupType backupType;
+       // public bool isEncrypted = false;
+       // public event PropertyChangedEventHandler? PropertyChanged;
+
 
         public int Progress
         {
@@ -79,6 +94,9 @@ namespace ProjetSave.ViewModel
         // Commandes pour exécuter et supprimer le job
         public ICommand ExecuteCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
+        public ICommand StopCommand { get; private set; }
+        //public ICommand PauseCommand { get; private set; }
+        //public ICommand StopCommand { get; private set; }
 
         // Référence à la collection parente pour pouvoir se supprimer
         private ObservableCollection<JobViewModel> parentCollection;
@@ -111,16 +129,23 @@ namespace ProjetSave.ViewModel
             parentCollection = parent;
             ExecuteCommand = new RelayCommand(param => ExecuteJob());
             DeleteCommand = new RelayCommand(param => DeleteJob());
-            
+            StopCommand = new RelayCommand(param => StopJob());
+            //Progress = 20;
+
         }
 
        
 
-
-       
+        
+        private void StopJob()
+        {
+            backupJob.Stop();
+            Console.WriteLine($"Stopped job: {Name}");
+        }
 
         private void DeleteJob()
         {
+            backupJob.Stop();
             parentCollection.Remove(this);
             Console.WriteLine($"Deleted job: {Name}");
         }

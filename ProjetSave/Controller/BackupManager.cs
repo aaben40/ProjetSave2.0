@@ -94,7 +94,7 @@ namespace ProjetSave.Controller
         //                throw; // Relancez l'exception pour une gestion plus générale des erreurs
         //            }
         //        }
-        private async Task CopyModifiedFiles(string sourceDir, string targetDir)
+        private async Task CopyModifiedFiles(string sourceDir, string targetDir, CancellationToken token)
         {
             // Copiez chaque fichier du répertoire source
             foreach (string file in Directory.GetFiles(sourceDir))
@@ -115,10 +115,10 @@ namespace ProjetSave.Controller
                 {
                     Directory.CreateDirectory(targetDirectoryPath);
                 }
-                await CopyModifiedFiles(directory, targetDirectoryPath);
+                await CopyModifiedFiles(directory, targetDirectoryPath,token);
             }
         }
-        private async Task ExecuteIncrementalBackup(BackupJob job)
+        private async Task ExecuteIncrementalBackup(BackupJob job, CancellationToken token)
         {
             Console.WriteLine($"Performing incremental backup for {job.Name}");
             try
@@ -133,7 +133,7 @@ namespace ProjetSave.Controller
                     Directory.CreateDirectory(job.TargetDirectory);
 
                 // Copiez les modifications incrémentielles
-                await CopyModifiedFiles(job.SourceDirectory, job.TargetDirectory);
+                await CopyModifiedFiles(job.SourceDirectory, job.TargetDirectory,token);
                 Console.WriteLine("Incremental backup completed successfully.");
             }
             catch (Exception ex)
@@ -142,7 +142,7 @@ namespace ProjetSave.Controller
                 throw; // Relancer l'exception pour permettre une gestion globale des erreurs
             }
         }
-        private async Task ExecuteFullBackup(BackupJob job)
+        private async Task ExecuteFullBackup(BackupJob job, CancellationToken token)
         {
             Console.WriteLine($"Performing full backup for {job.Name}");
             try
@@ -156,7 +156,7 @@ namespace ProjetSave.Controller
                     Directory.CreateDirectory(job.TargetDirectory);
 
                 // Copiez tous les fichiers et répertoires de manière récursive
-                await CopyDirectory(job.SourceDirectory, job.TargetDirectory,job);
+                await CopyDirectory(job.SourceDirectory, job.TargetDirectory,job,token);
                 Console.WriteLine("Backup completed successfully.");
             }
             catch (Exception ex)
@@ -191,14 +191,14 @@ namespace ProjetSave.Controller
                 // Simulate some delay for demonstration
                 // Rapport initial de progression
                 job.TotalFiles = Directory.GetFiles(job.SourceDirectory, "*", SearchOption.AllDirectories).Length;
-
+                var token = job.cancellationTokenSource.Token;
                 switch (job.Type)
                 {
                     case BackupType.Full:
-                        await ExecuteFullBackup(job);
+                        await ExecuteFullBackup(job,token);
                         break;
                     case BackupType.Incremental:
-                        await ExecuteIncrementalBackup(job);
+                        await ExecuteIncrementalBackup(job,token);
                         break;
                 }
 
@@ -220,6 +220,13 @@ namespace ProjetSave.Controller
                     FileSize = CalculateFileSize(job.SourceDirectory),
                     TransferTimeMs = job.TransferTimeMs,
                     EncryptionTimeMs = job.EncryptionTimeMs
+                });
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show($"Le répertoire est invalide pour le job '{job.Name}': {ex.Message}", "Erreur de répertoire", MessageBoxButton.OK, MessageBoxImage.Error);
                 });
             }
             catch (Exception ex)
@@ -331,11 +338,20 @@ namespace ProjetSave.Controller
             }
         }
 
-        public void StopAllJobs()
+        public void StopAllJobs(ObservableCollection<JobViewModel> jobViewModels)
         {
-            foreach (var job in backupJobs)
+            //Console.WriteLine(backupJobs.Count);
+            //foreach (var job in backupJobs)
+            //{
+            //    job.Stop();
+            //}
+            var sortedJobs = jobViewModels
+               // Ajouter à la fin les jobs sans priorité ou avec zéro
+               .ToList();
+
+            foreach (var job in sortedJobs)
             {
-                job.Stop();
+                job.StopCommand.Execute(null);
             }
         }
 
@@ -352,7 +368,7 @@ namespace ProjetSave.Controller
 
         //    }
         //}
-        private async Task CopyDirectory(string sourceDir, string targetDir, BackupJob job)
+        private async Task CopyDirectory(string sourceDir, string targetDir, BackupJob job, CancellationToken token)
         {
             // Créer le dossier de destination s'il n'existe pas
             Directory.CreateDirectory(targetDir);
@@ -361,18 +377,18 @@ namespace ProjetSave.Controller
             {
                 string fileName = Path.GetFileName(file);
                 string destFile = Path.Combine(targetDir, fileName);
-                await CopyFile(file, destFile, job);
+                await CopyFile(file, destFile, job,token);
             }
 
             foreach (var dir in Directory.GetDirectories(sourceDir))
             {
                 string dirName = Path.GetFileName(dir);
                 string destDir = Path.Combine(targetDir, dirName);
-                await CopyDirectory(dir, destDir, job);
+                await CopyDirectory(dir, destDir, job,token);
             }
         }
 
-        private async Task CopyFile(string sourcePath, string targetPath, BackupJob job)
+        private async Task CopyFile(string sourcePath, string targetPath, BackupJob job, CancellationToken token)
         {
             string fileName = Path.GetFileName(sourcePath);
             string destPath = targetPath;
@@ -385,10 +401,15 @@ namespace ProjetSave.Controller
             using (FileStream destStream = new FileStream(destPath, FileMode.Create, FileAccess.Write))
             {
                 byte[] buffer = new byte[81920];
+                long totalBytesRead = 0;
                 int bytesRead;
-                while ((bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)
+                while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                 {
-                    destStream.Write(buffer, 0, bytesRead);
+                    token.ThrowIfCancellationRequested();
+                    await destStream.WriteAsync(buffer, 0, bytesRead);
+                    totalBytesRead += bytesRead;
+                    int progress = (int)(totalBytesRead * 100 / sourceStream.Length);
+                    Application.Current.Dispatcher.Invoke(() => job.Progress = progress);
                 }
             }
             job.FilesCopied++;
